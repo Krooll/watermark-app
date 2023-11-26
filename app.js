@@ -14,8 +14,6 @@ const addTextWatermarkToImage = async function(inputFile, outputFile, text) {
 
     image.print(font, 0, 0, textData, image.getWidth(), image.getHeight());
     await image.quality(100).writeAsync(outputFile);
-    console.log('success');
-    startApp();
   }
   catch(error) {
     console.log('Something went wrong... Try again!'); // if there's an error, we catch it and show it in console
@@ -34,8 +32,6 @@ const addImageWatermarkToImage = async function(inputFile, outputFile, watermark
       opacitySource: 0.5,
     });
     await image.quality(100).writeAsync(outputFile);
-    console.log('success');
-    startApp();
   }
   catch(error) {
     console.log('Something went wrong... Try again!'); // if there's an error, we catch it and show it in console
@@ -46,8 +42,19 @@ const invertColor = async function(inputFile, outputFile) {
   try {
     const image = await Jimp.read(inputFile);
     image.invert()
-    await image.quality(100).writeAsync(outputFile);
-    return image;
+    await image.writeAsync(outputFile);
+  }
+  catch(error) {
+    console.log('Something went wrong... Try again!'); // if there's an error, we catch it and show it in console
+    return null;
+  }
+};
+
+const brightnessImage = async function(inputFile, outputFile) {
+  try {
+    const image = await Jimp.read(inputFile);
+    image.brightness(0.5);
+    await image.writeAsync(outputFile);
   }
   catch(error) {
     console.log('Something went wrong... Try again!'); // if there's an error, we catch it and show it in console
@@ -106,6 +113,7 @@ const startApp = async () => {
     options.watermarkImage = image.filename;
     if(fs.existsSync('./img/' + options.inputImage) && fs.existsSync('./img/' + options.watermarkImage)) {
       addImageWatermarkToImage('./img/' + options.inputImage, './img/' + prepareOutputFilename(options.inputImage), './img/' + options.watermarkImage);
+      console.log('Success');
     }else {
       console.log('Something went wrong... Try again')
     }
@@ -124,10 +132,31 @@ const startApp = async () => {
         './img/' + options.inputImage,
         './img/' + prepareOutputFilename(options.inputImage)
       );
+      console.log('Success');
     } else {
       console.log('Something went wrong... Try again');
     }
   }
+
+  const brightnessAnswer = await inquirer.prompt([{
+    name: "brightness",
+    message: 'Would you like to change brigthness?',
+    type: 'confirm'
+  }]);
+
+  if (brightnessAnswer.brightness) {
+    if (fs.existsSync('./img/' + options.inputImage)) {
+      brightnessImage(
+        './img/' + options.inputImage,
+        './img/' + prepareOutputFilename(options.inputImage)
+      );
+      console.log('Success');
+    } else {
+      console.log('Something went wrong... Try again');
+    }
+  }
+
+  startApp();
 };
 startApp();
 
